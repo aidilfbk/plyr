@@ -514,6 +514,25 @@ class Listeners {
 
       triggerEvent.call(player, elements.container, event.type, true, detail);
     });
+
+    // Capture 'error' event on <source> elements since they don't bubble
+    // Manually trigger them on the container with event bubbling
+    if (player.isHTML5) {
+      // Attach event listeners on the original element just once
+      if (!player.ready && player.elements.original.querySelector('source') !== null) {
+        on.call(player, player.elements.original, 'error', (event) => {
+          if (event.target instanceof HTMLSourceElement && event.currentTarget === player.elements.original) {
+            triggerEvent.call(player, elements.container, event.type, true);
+          }
+        }, true, true);
+      }
+
+      on.call(player, player.media, 'error', (event) => {
+        if (event.target instanceof HTMLSourceElement && event.currentTarget === player.media) {
+          triggerEvent.call(player, elements.container, event.type, true);
+        }
+      }, true, true);
+    }
   }
 
   // Run default and custom handlers
